@@ -1,30 +1,29 @@
 // Tokens
 %token 
-  INT
-  PLUS
-  SUB
-  MUL
-  DIV
-  MOD
-  EQUALS
-  DIFF
-  GREATER_THAN
-  LESS_THAN
-  GREATER_THAN_EQUALS
-  LESS_THAN_EQUALS
-  ATRIB
-  OPEN
-  CLOSE
-  IF
-  ELSE
-  END
-  FOR
-  TRUE
-  FALSE
-  VAR
-  NL
-  ABRE
-  FECHA
+  INT			// Inteiros
+  PLUS 			// +
+  SUB		   	// -
+  MUL 			// x
+  DIV		  	// /
+  MOD 		  	// %
+  EQUALS 	  	// ==
+  DIFF 		  	// !=
+  GREATER_THAN 		// >
+  LESS_THAN 		// < 
+  GREATER_THAN_EQUALS 	// >=
+  LESS_THAN_EQUALS 	// <=
+  ATRIB 		// :=
+  OPEN 			// (
+  CLOSE 		// )
+  IF 			// IF
+  ELSE 			// ELSE
+  FOR 			// FOR
+  TRUE 			// TRUE 
+  FALSE 		// FALSE 
+  VAR 			// Variaveis 
+  NL 			// nova linha
+  ABRE 			// { 
+  FECHA 		// }
 
 
 
@@ -51,7 +50,7 @@
 // into both parser.c and parser.h
 %code requires
 {
-  #include <stdio.h>
+xb  #include <stdio.h>
   #include <stdlib.h>
   #include "abstree.h"  
 
@@ -69,7 +68,7 @@ program: cmd_list { rootl = $1; }
 
 cmd_list: 
   exprCmd { $$ = mklist($1, NULL); }
-  | exprCmd NL cmd_list { $$ = mklist($1,$2); }
+  | exprCmd F cmd_list { $$ = mklist($1,$2); }
 
 expr: 
   INT { $$ = ast_integer($1); }
@@ -82,18 +81,21 @@ expr:
 exprB:
   TRUE { $$ = ast_integer(1);}
   |FALSE { $$ = ast_integer(0);}
-  | expr EQUALS expr { $$ = ast_operation(EQUALS, $1, $3); }
-  | expr DIFF expr { $$ = ast_operation(DIFF, $1, $3); }
-  | expr GREATER_THAN expr { $$ = ast_operation(GREATER_THAN, $1, $3); }
-  | expr LESS_THAN expr { $$ = ast_operation(LESS_THAN, $1, $3); }
-  | expr GREATER_THAN_EQUALS expr { $$ = ast_operation(GREATER_THAN_EQUALS, $1, $3); }
-  | expr LESS_THAN_EQUALS expr { $$ = ast_operation(LESS_THAN_EQUALS, $1, $3); }
+  | VAR  { $$ = ast_var($1); }
+  | expr EQUALS expr { $$ = ast_boolean(EQUALS, $1, $3); }
+  | expr DIFF expr { $$ = ast_boolean(DIFF, $1, $3); }
+  | expr GREATER_THAN expr { $$ = ast_boolean(GREATER_THAN, $1, $3); }
+  | expr LESS_THAN expr { $$ = ast_boolean(LESS_THAN, $1, $3); }
+  | expr GREATER_THAN_EQUALS expr { $$ = ast_boolean(GREATER_THAN_EQUALS, $1, $3); }
+  | expr LESS_THAN_EQUALS expr { $$ = ast_boolean(LESS_THAN_EQUALS, $1, $3); }
 
 exprCmd:
-  VAR ATRIB expr
-  | IF OPEN exprB CLOSE ABRE CmdList FECHA 
-  | IF OPEN exprB CLOSE ABRE CmdList ELSE ABRE CmdList FECHA FECHA
-
+  VAR ATRIB expr  { $$ = mkAtrib($1, $3); }
+  | IF OPEN exprB CLOSE ABRE CmdList FECHA  { $$ = astif($3, $6, NULL); }
+  | IF OPEN exprB CLOSE ABRE CmdList ELSE ABRE CmdList FECHA FECHA { $$ = astif($3, $6, $9);
+  | FOR VAR ATRIB expr F exprB F exprCmd ABRE cmd_list FECHA { $$ = astfor($3, $6, NULL); }
+  | FOR F exprB F ABRE cmd_list FECHA { $$ = astfor(); }
+  
 %%
 
 

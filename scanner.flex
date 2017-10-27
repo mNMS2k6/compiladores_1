@@ -43,7 +43,8 @@ int yyline = 1;
 "true" { return TRUE; }
 "false" { return FALSE; }
 
-*\n { return NL; }
+
+*; { return F; }
 
 \-?[a-z,A-Z]+ {
 	yylval.varval = strdup(yytext);
