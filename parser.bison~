@@ -15,16 +15,15 @@ LESS_THAN_EQUALS 	// <=
 ATRIB 		// :=
 OPEN 			// (
 CLOSE 		// )
-IF1 			// IF
-ELSE1 			// ELSE
-FOR1 			// FOR
+IF 			// IF
+ELSE 			// ELSE
+FOR 			// FOR
 TRUE 			// TRUE 
 FALSE 		// FALSE 
 VAR 			// Variaveis 
 NL 			// nova linha
 ABRE 			// { 
 FECHA 		// }
-F 		//;
 
 
 
@@ -40,23 +39,12 @@ F 		//;
 %union {
 int intValue;
 Expr* exprValue;
-Exprlist* list;
-char *varval;
-cmdList cmd_l; 
-cmd cmd_;
+Exprlist* list; 
 }
 
 %type <intValue> INT
 %type <exprValue> expr
-//%type <list> expr_list
-%type <exprValue> exprB // Exp bool
-
-%type <varval> VAR
-
-%type <cmd_> for_atrib
-%type <cmd_> exprCmd
-%type <cmd_l> cmd_list
-
+%type <list> expr_list
 
 // Use "%code requires" to make declarations go
 // into both parser.c and parser.h
@@ -80,7 +68,7 @@ program: cmd_list { rootl = $1; }
 
 cmd_list: 
 exprCmd { $$ = mklist($1, NULL); }
-| exprCmd F cmd_list { $$ = mklist($1,$3); }
+| exprCmd F cmd_list { $$ = mklist($1,$2); }
 
 expr: 
 INT { $$ = ast_integer($1); }
@@ -103,15 +91,13 @@ TRUE { $$ = ast_integer(1);}
 
 exprCmd:
 VAR ATRIB expr  { $$ = mkAtrib($1, $3); }
-| IF1 OPEN exprB CLOSE ABRE cmd_list FECHA  { $$ = astif($3, $6, NULL); }
-| IF1 OPEN exprB CLOSE ABRE cmd_list ELSE1 ABRE cmd_list FECHA FECHA { $$ = astif($3, $6, $9); }
-| FOR1 for_atrib F exprB F exprCmd ABRE cmd_list FECHA { $$ = astfor($2, $4, $8); }
-| FOR1 F exprB F ABRE cmd_list FECHA { $$ = astfor($3, $6); }
-
-for_atrib:
-	VAR ATRIB expr     { $$ = mkAtrib($1,$3); }
+| IF OPEN exprB CLOSE ABRE CmdList FECHA  { $$ = astif($3, $6, NULL); }
+| IF OPEN exprB CLOSE ABRE CmdList ELSE ABRE CmdList FECHA FECHA { $$ = astif($3, $6, $9);
+| FOR VAR ATRIB expr F exprB F exprCmd ABRE cmd_list FECHA { $$ = astfor($3, $6, NULL); }
+| FOR F exprB F ABRE cmd_list FECHA { $$ = astfor(); }
 
 %%
+
 
 void yyerror(const char* err) {
 printf("Line %d: %s - '%s'\n", yyline, err, yytext  );
