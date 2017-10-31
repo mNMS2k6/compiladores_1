@@ -49,12 +49,44 @@ cmd astIf(Expr ifCond, cmdList ifBody, cmdList elsee)
   return node;     
 }
 
-
-// imcompleto alterar para comand list
-Exprlist* mklist(Expr* e, Exprlist* list)
+cmd astFor(cmd decl, Expr cond, cmdList body)
 {
-  Exprlist* node= (Exprlist *)malloc(sizeof(Exprlist));
-  node->exp=e;
-  node->next=list;
-  return node;
+  cmd node = (cmd) malloc(sizeof(struct _cmd));
+  node->kind = E_FOR;
+  node->attr.forr.decl = decl; 
+  node->attr.forr.cond = cond;
+  node->attr.forr.body = body;
+  return node;     
+}
+
+cmd astFor(Expr cond, cmdList body)
+{
+  cmd node = (cmd) malloc(sizeof(struct _cmd));
+  node->kind = E_WHILE;
+  node->attr.whilee.cond = cond;
+  node->attr.whilee.body = body;
+  return node;     
+}
+
+cmdList mklist(cmd head, cmdList tail)
+{
+	cmdList node = (cmdList) malloc(sizeof(struct _cmdList));
+  node->head = head;
+  node->tail = tail;
+  return node;	
+}
+cmd mkOutput(Expr e)
+{
+  cmd node = (cmd) malloc(sizeof(struct _cmd));
+  node->kind = E_OUTPUT;
+  node->attr.output = e; 
+  return node;      
+}
+
+cmd mkInput(char *var)
+{
+  cmd node = (cmd) malloc(sizeof(struct _cmd));
+  node->kind = E_INPUT;
+  node->attr.input = var; 
+  return node;       
 }
