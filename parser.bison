@@ -40,7 +40,7 @@ F 		//;
 %union {
 int intValue;
 Expr* exprValue;
-Exprlist* list;
+//Exprlist* list;
 char *varval;
 cmdList cmd_l; 
 cmd cmd_;
@@ -48,7 +48,7 @@ cmd cmd_;
 
 %type <intValue> INT
 %type <exprValue> expr
-//%type <list> expr_list
+//%type <Exprlist> Exprlist
 %type <exprValue> exprB // Exp bool
 
 %type <varval> VAR
@@ -72,7 +72,7 @@ extern char* yytext;
 extern FILE* yyin;
 extern void yyerror(const char* msg);
 Expr* root;
-Exprlist* rootl;
+//Exprlist* rootl;
 }
 
 %%
@@ -106,7 +106,7 @@ VAR ATRIB expr  { $$ = mkAtrib($1, $3); }
 | IF1 OPEN exprB CLOSE ABRE cmd_list FECHA  { $$ = astif($3, $6, NULL); }
 | IF1 OPEN exprB CLOSE ABRE cmd_list ELSE1 ABRE cmd_list FECHA FECHA { $$ = astif($3, $6, $9); }
 | FOR1 for_atrib F exprB F exprCmd ABRE cmd_list FECHA { $$ = astfor($2, $4, $8); }
-| FOR1 F exprB F ABRE cmd_list FECHA { $$ = astfor($3, $6); }
+| FOR1 exprB ABRE cmd_list FECHA { $$ = astfor($2, $4); }
 
 for_atrib:
 	VAR ATRIB expr     { $$ = mkAtrib($1,$3); }

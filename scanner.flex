@@ -38,7 +38,6 @@ return INT;
 "}" { return FECHA; }
 "if" { return IF1; }
 "else" { return ELSE1; }
-"end" { return END; }
 "for" { return FOR1; }
 "true" { return TRUE; }
 "false" { return FALSE; }
@@ -50,5 +49,5 @@ return INT;
 yylval.varval = strdup(yytext);
 return VAR; }
 
-.  { yyerror("unexpected character"); }
+. { yyerror("unexpected character"); }
 %%

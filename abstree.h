@@ -4,7 +4,7 @@
 #define __ast_h__
 
 // AST for expressions
-struct _Expr {
+typedef struct _Expr {
   enum { 
     E_INTEGER,
     E_OPERATION,
@@ -14,18 +14,18 @@ struct _Expr {
   
   union 
   {
-    int value; // E_INTEGER
+    int value; // INTEGER
     
-    char *var; // E_VARIABLE
+    char *var; // VAR
 
-    struct // E_OPERATION
+    struct // OPERATION
     { 
       int operator; // PLUS, MINUS, etc 
       struct _Expr* left;
       struct _Expr* right;
     } op;
 
-    struct // E_OPBOOLEAN 
+    struct // OPBOOLEAN 
     { 
       int operator; // MORE, LESS, etc 
       struct _Expr* left;
@@ -51,13 +51,13 @@ typedef struct _cmd
   
   union
   {
-    struct // E_ATRIB
+    struct // ATRIB
     {
       char *var;
       Expr exp;
     } atrib;
 
-    struct // E_IF -> if elseif(LIST) else
+    struct // IF
     {
       Expr cond;
       struct _cmdList* body;   
@@ -65,22 +65,22 @@ typedef struct _cmd
       struct _cmdList* elsee;
     } iff;
 
-    struct // E_WHILE
+    struct // FOR
     {
       Expr cond;
       struct _cmdList* body;
     } for1;
 
-    struct // E_FOR
+    struct // FOR
     {
       struct _cmd* decl;
       Expr cond;
       struct _cmdList* body;
     } for1;
 
-    Expr output; // E_OUTPUT
+    Expr output; // OUTPUT
 
-    char *input; // E_INPUT
+    char *input; // INPUT
   } attr;
 }* cmd;
 
