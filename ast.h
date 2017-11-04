@@ -81,12 +81,6 @@ typedef struct _cmd
       struct _cmdList* body;
     } for1;
     
-    struct // func
-    {
-      char *var;
-      struct _cmdList* body;      
-    }func;
-
     struct // input
     {
       Expr cond;
@@ -104,6 +98,17 @@ typedef struct _cmdList
   struct _cmdList *tail;
 }* cmdList;
 
+typedef struct _func // func
+{
+  char *var;
+  struct _cmdList* body;      
+} *func;
+
+typedef struct _funcList // list of funcs
+{
+  func head;
+  struct _funcList *tail;
+}* funcList;
 
 Expr ast_integer(int v);
 Expr ast_var(char *v);
@@ -114,7 +119,8 @@ cmd mkAtrib(char *var, Expr e);
 cmd astIf(Expr ifCond, cmdList ifBody, cmdList elsee);
 cmd astWhile1(Expr cond, cmdList body);
 cmd astFor1(cmd decl, Expr cond, cmd incre, cmdList body);
-cmd astFunc(char * func_n, cmdList body);
 cmd ast_input(char *v);
+func astFunc(char * func_n, cmdList body);
+funcList astFunction(func one, funcList others);
 
 #endif

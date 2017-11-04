@@ -220,32 +220,24 @@ void cmd_list(cmd cmd, int tab)
     }
     printf("}\n");
   }
-  else if(cmd->kind == E_FUNC)
-  {
-    printf("func ");
-    printf("%s()\n", cmd->attr.func.var);
-    for(i=0; i<tab; i++)
-    {
-      printf("\t");
-    }
-    printf("{\n");
-    while(cmd->attr.func.body != NULL)
-    {
-      cmd_list(cmd->attr.func.body->head, tab+1);
-      cmd->attr.func.body = cmd->attr.func.body->tail;
-    }
-    for(i=0; i<tab; i++)
-    {
-      printf("\t");
-    }
-    printf("}\n");
-  }
+ 
   else if(cmd->kind == E_INPUT)
   {
     printf("fmt.Scan (&");
     eval(cmd->attr.input.cond);
     printf(")\n");
   }
+}
+
+void functions(func one)
+{
+  printf("func %s()\n{\n",one->var);
+  while(one->body != NULL)
+  {
+    cmd_list(one->body->head,1);
+    one->body = one->body->tail;
+  }
+  printf("}\n");
 }
 
 int main(int argc, char** argv) 
@@ -263,7 +255,7 @@ int main(int argc, char** argv)
 
     while(root != NULL)
     {
-      cmd_list(root->head, 0);
+      functions(root->head);
       root = root->tail;
     }
   }

@@ -86,19 +86,26 @@ cmdList mklist(cmd head, cmdList tail)
   return node;	
 }
 
-cmd astFunc(char * func_n, cmdList body)
-{
-  cmd node = (cmd) malloc(sizeof(struct _cmd));
-  node->kind = E_FUNC;
-  node->attr.func.var = func_n;
-  node->attr.func.body = body;
-  return node;      
-}
-
 cmd ast_input(char *v)
 {
   cmd node = (cmd) malloc(sizeof(struct _cmd));  
   node->kind = E_INPUT;
   node->attr.input.cond = ast_var(v); 
   return node;       
+}
+
+func astFunc(char * func_n, cmdList body)
+{
+  func node = (func) malloc(sizeof(struct _func));
+  node->var = func_n;
+  node->body = body;
+  return node;      
+}
+
+funcList astFunction(func one, funcList others)
+{
+  funcList node = (funcList) malloc(sizeof(struct _funcList));
+  node->head = one;
+  node->tail = others;
+  return node;  
 }

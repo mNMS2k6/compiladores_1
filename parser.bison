@@ -50,7 +50,12 @@ Expr exprValue;
 char *variable;
 cmdList cmd_l; 
 cmd cmd_;
+func func_;
+funcList funcList_;
 }
+
+%type <func_> FUNCTION
+%type <funcList_> FUNCTIONLIST
 
 %type <intValue> INT
 %type <exprValue> expr
@@ -58,6 +63,7 @@ cmd cmd_;
 %type <cmd_> for_atrib
 %type <cmd_> exprCmd
 %type <cmd_l> cmd_list
+
 
 // Use "%code requires" to make declarations go
 // into both parser.c and parser.h
@@ -72,15 +78,27 @@ extern int yyline;
 extern char* yytext;
 extern FILE* yyin;
 extern void yyerror(const char* msg);
-cmdList root;
+funcList root;
 }
 
 %%
-program: cmd_list { root = $1; }
+program: FUNCTIONLIST { root = $1; }
+
+FUNCTIONLIST:
+	FUNCTION FUNCTIONLIST { $$ = astFunction($1,$2); }
+
+	| FUNCTION { $$ = astFunction($1, NULL); }
+
+
+	
+FUNCTION:
+	FUNC TEXT OPEN CLOSE ABRE cmd_list FECHA { $$ = astFunc($2,$6); }
+	
 
 cmd_list: 
 	exprCmd { $$ = mklist($1, NULL); }
 	| exprCmd cmd_list { $$ = mklist($1,$2); }
+
 
 expr: 
 	INT { $$ = ast_integer($1); }
@@ -109,7 +127,6 @@ exprCmd:
 	| IF1 expr ABRE cmd_list FECHA ELSE1 ABRE cmd_list FECHA { $$ = astIf($2, $4, $8); }
 	| FOR1 for_atrib F expr F for_atrib ABRE cmd_list FECHA { $$ = astFor1($2, $4, $6, $8); }
 	| FOR1 expr ABRE cmd_list FECHA { $$ = astWhile1($2, $4); }
-	| FUNC TEXT OPEN CLOSE ABRE cmd_list FECHA { $$ = astFunc($2,$6); }
 	| INPUT OPEN ANDC TEXT CLOSE F { $$ = ast_input($4); }
 
 for_atrib:
