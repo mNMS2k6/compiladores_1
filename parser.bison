@@ -27,6 +27,10 @@ ABRE 				// {
 FECHA 				// }
 F 					//;
 VAR 				// "var"
+FUNC				// "func"
+INPUT				// "fmt.Scan"
+OUTPUT				// "fmt.Println"
+ANDC				// "&"
 
 
 
@@ -39,10 +43,10 @@ VAR 				// "var"
 %start program;
 
 // Types/values in association to grammar symbols.
-%union {
+%union 
+{
 int intValue;
 Expr exprValue;
-//Exprlist* list;
 char *variable;
 cmdList cmd_l; 
 cmd cmd_;
@@ -50,15 +54,10 @@ cmd cmd_;
 
 %type <intValue> INT
 %type <exprValue> expr
-//%type <Exprlist> Exprlist
-//%type <exprValue> exprV // Exp bool
-
 %type <variable> TEXT
-
 %type <cmd_> for_atrib
 %type <cmd_> exprCmd
 %type <cmd_l> cmd_list
-
 
 // Use "%code requires" to make declarations go
 // into both parser.c and parser.h
@@ -74,7 +73,6 @@ extern char* yytext;
 extern FILE* yyin;
 extern void yyerror(const char* msg);
 cmdList root;
-//Exprlist* rootl;
 }
 
 %%
@@ -109,8 +107,10 @@ exprCmd:
 	| VAR TEXT F { $$ = mkAtrib($2, ast_integer(0)); }
 	| IF1 expr ABRE cmd_list FECHA  { $$ = astIf($2, $4, NULL); }
 	| IF1 expr ABRE cmd_list FECHA ELSE1 ABRE cmd_list FECHA { $$ = astIf($2, $4, $8); }
-	| FOR1 for_atrib F expr F exprCmd ABRE cmd_list FECHA { $$ = astFor1($2, $4, $6, $8); }
+	| FOR1 for_atrib F expr F for_atrib ABRE cmd_list FECHA { $$ = astFor1($2, $4, $6, $8); }
 	| FOR1 expr ABRE cmd_list FECHA { $$ = astWhile1($2, $4); }
+	| FUNC TEXT OPEN CLOSE ABRE cmd_list FECHA { $$ = astFunc($2,$6); }
+	| INPUT OPEN ANDC TEXT CLOSE F { $$ = ast_input($4); }
 
 for_atrib:
 	TEXT ATRIB expr     { $$ = mkAtrib($1,$3); }
@@ -119,4 +119,4 @@ for_atrib:
 
 void yyerror(const char* err) {
 printf("Line %d: %s - '%s' \n", yyline, err, yytext  );
-}// {
+}

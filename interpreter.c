@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include "parser.h"
-typedef int bool;
-enum { false, true };
 
-void eval(Expr expr) {
+
+void eval(Expr expr)
+{
+
   int result = 0;
-
-  
   if (expr->kind == E_INTEGER)
   {
     printf("%d", expr->attr.value);
@@ -15,11 +14,15 @@ void eval(Expr expr) {
   {
     printf("%s", expr->attr.var);
   } 
+  else if (expr->kind == E_INPUT)
+  {
+    printf("fmt.Scan(&%s)\n", expr->attr.var);
+  }
   else if (expr->kind == E_OPERATION)
   {
     eval(expr->attr.op.left);
 
-    switch (expr->attr.op.operator) 
+    switch (expr->attr.op.operator)
     {
       case PLUS: 
       printf(" + ");
@@ -76,17 +79,31 @@ void eval(Expr expr) {
       case DIFF:
       printf(" != ");
       break;
-      // TODO Other cases here ...
+
       default: yyerror("Unknown operator!");
     }
     eval(expr->attr.op_bl.right);
-
   }
 
 }
 
-void cmd_list(cmd cmd) 
+void cmd_list_for(cmd cmd)
 {
+  if (cmd->kind == E_ATRIB) 
+  {
+    printf("%s = ", cmd->attr.atrib.var); 
+    eval(cmd->attr.atrib.exp);
+  }  
+}
+
+void cmd_list(cmd cmd, int tab) 
+{
+  int i = 0;
+  for(i=0; i<tab; i++)
+  {
+    printf("\t");
+  }
+
   if (cmd->kind == E_ATRIB) 
   {
     printf("%s = ", cmd->attr.atrib.var); 
@@ -96,14 +113,23 @@ void cmd_list(cmd cmd)
   else if (cmd->kind == E_IF) 
   {
     if (cmd->attr.iff.elsee == NULL)
-    {
+    { 
       printf("IF "); 
       eval(cmd->attr.iff.cond);
-      printf("\n{\n");
+      printf("\n");
+      for(i=0; i<tab; i++)
+      {
+        printf("\t");
+      }
+      printf("{\n");
       while(cmd->attr.iff.body != NULL)
       {
-        cmd_list(cmd->attr.iff.body->head);
+        cmd_list(cmd->attr.iff.body->head, tab+1);
         cmd->attr.iff.body = cmd->attr.iff.body->tail;
+      }
+      for(i=0; i<tab; i++)
+      {
+        printf("\t");
       }
       printf("}\n");
     }
@@ -111,23 +137,115 @@ void cmd_list(cmd cmd)
     {
       printf("IF "); 
       eval(cmd->attr.iff.cond);
-      printf("\n{\n");
+      printf("\n");
+      for(i=0; i<tab; i++)
+      {
+        printf("\t");
+      }
+      printf("{\n");
       while(cmd->attr.iff.body != NULL)
       {
-        cmd_list(cmd->attr.iff.body->head);
+        cmd_list(cmd->attr.iff.body->head, tab+1);
         cmd->attr.iff.body = cmd->attr.iff.body->tail;
       }
+      for(i=0; i<tab; i++)
+      {
+        printf("\t");
+      }
       printf("}\n");
-      printf("ELSE ");
-      printf("\n{\n");
+      for(i=0; i<tab; i++)
+      {
+        printf("\t");
+      }
+      printf("ELSE \n");
+      for(i=0; i<tab; i++)
+      {
+        printf("\t");
+      }
+      printf("{\n");
       while(cmd->attr.iff.elsee != NULL)
       {
-        cmd_list(cmd->attr.iff.elsee->head);
+        cmd_list(cmd->attr.iff.elsee->head, tab+1);
         cmd->attr.iff.elsee = cmd->attr.iff.elsee->tail;
+      }
+      for(i=0; i<tab; i++)
+      {
+        printf("\t");
       }
       printf("}\n");
     }
-  } 
+  }
+  else if(cmd->kind == E_FOR1)
+  {
+    printf("FOR ");
+    cmd_list_for(cmd->attr.for1.decl);
+    printf("; ");
+    eval(cmd->attr.for1.cond);
+    printf("; ");
+    cmd_list(cmd->attr.for1.incre, 0);
+    for(i=0; i<tab; i++)
+    {
+      printf("\t");
+    }
+    printf("{\n");
+    while(cmd->attr.for1.body != NULL)
+    {
+      cmd_list(cmd->attr.for1.body->head, tab+1);
+      cmd->attr.for1.body = cmd->attr.for1.body->tail;
+    }
+    for(i=0; i<tab; i++)
+    {
+      printf("\t");
+    }
+    printf("}\n");
+  }
+  else if(cmd->kind == E_WHILE1)
+  {
+    printf("FOR ");
+    eval(cmd->attr.while1.cond);
+    printf("\n");
+    for(i=0; i<tab; i++)
+    {
+      printf("\t");
+    }
+    printf("{\n");
+    while(cmd->attr.while1.body != NULL)
+    {
+      cmd_list(cmd->attr.while1.body->head, tab+1);
+      cmd->attr.while1.body = cmd->attr.while1.body->tail;
+    }
+    for(i=0; i<tab; i++)
+    {
+      printf("\t");
+    }
+    printf("}\n");
+  }
+  else if(cmd->kind == E_FUNC)
+  {
+    printf("func ");
+    printf("%s()\n", cmd->attr.func.var);
+    for(i=0; i<tab; i++)
+    {
+      printf("\t");
+    }
+    printf("{\n");
+    while(cmd->attr.func.body != NULL)
+    {
+      cmd_list(cmd->attr.func.body->head, tab+1);
+      cmd->attr.func.body = cmd->attr.func.body->tail;
+    }
+    for(i=0; i<tab; i++)
+    {
+      printf("\t");
+    }
+    printf("}\n");
+  }
+  else if(cmd->kind == E_INPUT)
+  {
+    printf("fmt.Scan (&");
+    eval(cmd->attr.input.cond);
+    printf(")\n");
+  }
 }
 
 int main(int argc, char** argv) 
@@ -145,7 +263,7 @@ int main(int argc, char** argv)
 
     while(root != NULL)
     {
-      cmd_list(root->head);
+      cmd_list(root->head, 0);
       root = root->tail;
     }
   }

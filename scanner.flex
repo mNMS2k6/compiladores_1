@@ -42,6 +42,11 @@ int yyline = 1;
 "else" { return ELSE1; }
 "for" { return FOR1; }
 ";" { return F; }
+"func" { return FUNC; }
+"fmt.Scan" { return INPUT; }
+"fmt.Println" { return OUTPUT; }
+"&" { return ANDC; }
+
 
 
 \-?[0-9]+ { yylval.intValue = atoi(yytext); return INT; }

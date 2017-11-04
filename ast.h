@@ -47,6 +47,7 @@ typedef struct _cmd
     E_WHILE1,
     E_FOR1,
     E_OUTPUT,
+    E_FUNC,
     E_INPUT
   } kind;
   
@@ -79,10 +80,20 @@ typedef struct _cmd
       struct _cmd* incre;
       struct _cmdList* body;
     } for1;
+    
+    struct // func
+    {
+      char *var;
+      struct _cmdList* body;      
+    }func;
 
-    Expr output; // OUTPUT
+    struct // input
+    {
+      Expr cond;
+    }input;
 
-    char *input; // INPUT
+    char *var;
+
   } attr;
 }* cmd;
 
@@ -103,7 +114,7 @@ cmd mkAtrib(char *var, Expr e);
 cmd astIf(Expr ifCond, cmdList ifBody, cmdList elsee);
 cmd astWhile1(Expr cond, cmdList body);
 cmd astFor1(cmd decl, Expr cond, cmd incre, cmdList body);
-cmd mkOutput(Expr e);
-cmd mkInput(char *var);
+cmd astFunc(char * func_n, cmdList body);
+cmd ast_input(char *v);
 
 #endif

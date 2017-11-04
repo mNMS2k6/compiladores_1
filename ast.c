@@ -64,6 +64,7 @@ cmd astFor1(cmd decl, Expr cond, cmd incre, cmdList body)
   node->kind = E_FOR1;
   node->attr.for1.decl = decl; 
   node->attr.for1.cond = cond;
+  node->attr.for1.incre = incre;
   node->attr.for1.body = body;
   return node;     
 }
@@ -84,19 +85,20 @@ cmdList mklist(cmd head, cmdList tail)
   node->tail = tail;
   return node;	
 }
-cmd mkOutput(Expr e)
+
+cmd astFunc(char * func_n, cmdList body)
 {
   cmd node = (cmd) malloc(sizeof(struct _cmd));
-  node->kind = E_OUTPUT;
-  node->attr.output = e; 
+  node->kind = E_FUNC;
+  node->attr.func.var = func_n;
+  node->attr.func.body = body;
   return node;      
 }
 
-cmd mkInput(char *var)
+cmd ast_input(char *v)
 {
-  cmd node = (cmd) malloc(sizeof(struct _cmd));
+  cmd node = (cmd) malloc(sizeof(struct _cmd));  
   node->kind = E_INPUT;
-  node->attr.input = var; 
+  node->attr.input.cond = ast_var(v); 
   return node;       
 }
-
